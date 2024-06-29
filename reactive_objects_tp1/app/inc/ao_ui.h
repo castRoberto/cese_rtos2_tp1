@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,64 +29,45 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
+
+#ifndef __AO_UI_H__
+#define __AO_UI_H__
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************** inclusions *******************************************/
 
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
+#include "active_object.h"
 
-#include "task_button.h"
-#include "task_led.h"
-#include "task_ui.h"
-#include "ao_led.h"
-#include "ao_ui.h"
+/********************** macros ***********************************************/
 
-/********************** macros and definitions *******************************/
+/********************** typedef **********************************************/
 
+typedef enum {
 
-/********************** internal data declaration ****************************/
+	SEND_OK = 0,
+	SEND_ERR = 1
 
-/********************** internal functions declaration ***********************/
+} op_result_e;
 
-/********************** internal data definition *****************************/
+/********************** external data declaration ****************************/
 
-/********************** external data declaration *****************************/
+/********************** external functions declaration ***********************/
 
-TaskHandle_t task_button_h;
+void ao_ui_init (ao_t* ao, handlerFunc_t handler);
 
-/********************** external functions definition ************************/
-void app_init(void) {
+op_result_e ao_ui_send_msg (ao_t* ao, void* msg);
 
-
-	ao_t ao_led_red;
-	ao_t ao_led_green;
-	ao_t ao_led_blue;
-
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
-
-  BaseType_t status;
-
-  status = xTaskCreate (task_button,
-		  	  	  	  	"task_button",
-						configMINIMAL_STACK_SIZE,
-						NULL,
-						tskIDLE_PRIORITY + (1u),
-						task_button_h);
-
-  configASSERT(pdPASS == status);
-
-
-
-  LOGGER_INFO("app init");
-
-  cycle_counter_init();
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
 
+
+#endif /* __AO_UI_H__ */
 /********************** end of file ******************************************/

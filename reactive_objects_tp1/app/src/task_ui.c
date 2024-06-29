@@ -54,8 +54,6 @@
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_button;
-extern SemaphoreHandle_t hsem_led;
 
 /********************** internal functions definition ************************/
 
@@ -65,11 +63,7 @@ void task_ui(void *argument)
 {
   while (true)
   {
-    if(pdTRUE == xSemaphoreTake(hsem_button, portMAX_DELAY))
-    {
-      LOGGER_INFO("ui led activate");
-      xSemaphoreGive(hsem_led);
-    }
+
   }
 }
 

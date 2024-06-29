@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,64 +29,65 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
+
+#ifndef __ACTIVE_OBJECT_H__
+#define __ACTIVE_OBJECT_H__
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************** inclusions *******************************************/
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "main.h"
 #include "cmsis_os.h"
+#include "board.h"
 #include "logger.h"
 #include "dwt.h"
-#include "board.h"
 
-#include "task_button.h"
-#include "task_led.h"
-#include "task_ui.h"
-#include "ao_led.h"
-#include "ao_ui.h"
+/********************** macros ***********************************************/
 
-/********************** macros and definitions *******************************/
+/********************** typedef **********************************************/
 
+typedef void (*handlerFunc_t)(void* event);
 
-/********************** internal data declaration ****************************/
+/* Active Object definition */
+typedef struct {
 
-/********************** internal functions declaration ***********************/
+	/* OS */
 
-/********************** internal data definition *****************************/
+	// Queue
+	QueueHandle_t event_queue_h;
+	uint16_t event_queue_len;
+	size_t event_size;
+	char queue_name[configMAX_TASK_NAME_LEN];
 
-/********************** external data declaration *****************************/
+	// Thread
+	char task_name[configMAX_TASK_NAME_LEN];
+	TaskHandle_t thread_h;
+	UBaseType_t priority;
 
-TaskHandle_t task_button_h;
+	/* Process */
+	handlerFunc_t handler;
 
-/********************** external functions definition ************************/
-void app_init(void) {
+} ao_t;
 
+/********************** external data declaration ****************************/
 
-	ao_t ao_led_red;
-	ao_t ao_led_green;
-	ao_t ao_led_blue;
+/********************** external functions declaration ***********************/
 
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
-
-  BaseType_t status;
-
-  status = xTaskCreate (task_button,
-		  	  	  	  	"task_button",
-						configMINIMAL_STACK_SIZE,
-						NULL,
-						tskIDLE_PRIORITY + (1u),
-						task_button_h);
-
-  configASSERT(pdPASS == status);
-
-
-
-  LOGGER_INFO("app init");
-
-  cycle_counter_init();
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
 
+#endif /* __ACTIVE_OBJECT_H__ */
 /********************** end of file ******************************************/
+

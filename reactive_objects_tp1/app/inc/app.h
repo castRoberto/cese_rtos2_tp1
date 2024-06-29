@@ -48,6 +48,8 @@ extern "C" {
 
 /********************** external data declaration ****************************/
 
+extern TaskHandle_t task_button_h;
+
 /********************** external functions declaration ***********************/
 void app_init(void);
 

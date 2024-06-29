@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,64 +29,75 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
 
 /********************** inclusions *******************************************/
 
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
 
-#include "task_button.h"
-#include "task_led.h"
-#include "task_ui.h"
-#include "ao_led.h"
 #include "ao_ui.h"
+#include "active_object.h"
 
 /********************** macros and definitions *******************************/
-
 
 /********************** internal data declaration ****************************/
 
 /********************** internal functions declaration ***********************/
 
+static void _task (void *parameters) {
+
+	ao_t* ao = (ao_t*) parameters;
+
+	while (1) {
+
+		void* msg;
+		if (pdPASS == xQueueReceive(ao->event_queue_h, msg, portMAX_DELAY)) {
+
+			ao->handler (msg);
+
+		}
+
+	}
+
+}
+
 /********************** internal data definition *****************************/
 
-/********************** external data declaration *****************************/
+/********************** external data definition *****************************/
 
-TaskHandle_t task_button_h;
+/********************** internal functions definition ************************/
 
 /********************** external functions definition ************************/
-void app_init(void) {
+
+void ao_ui_init (ao_t* ao, handlerFunc_t handler) {
+
+	ao->event_queue_h = xQueueCreate (ao->event_queue_len, ao->event_size);
+	configASSERT(NULL != ao->event_queue_h);
+
+	vQueueAddToRegistry(ao->event_queue_h, ao->queue_name);
 
 
-	ao_t ao_led_red;
-	ao_t ao_led_green;
-	ao_t ao_led_blue;
+	BaseType_t status =
+		xTaskCreate (_task,
+					 ao->task_name,
+					 configMINIMAL_STACK_SIZE,
+					 (void*)ao,
+					 ao->priority,
+					 &ao->thread_h);
 
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
+	configASSERT(pdPASS == status);
 
-  BaseType_t status;
+	ao->handler = handler;
 
-  status = xTaskCreate (task_button,
-		  	  	  	  	"task_button",
-						configMINIMAL_STACK_SIZE,
-						NULL,
-						tskIDLE_PRIORITY + (1u),
-						task_button_h);
-
-  configASSERT(pdPASS == status);
-
-
-
-  LOGGER_INFO("app init");
-
-  cycle_counter_init();
 }
+
+
+op_result_e ao_ui_send_msg (ao_t* ao, void* msg) {
+
+	return (pdPASS == xQueueSend (ao->event_queue_h, msg, 0));
+
+}
+
+
 
 /********************** end of file ******************************************/

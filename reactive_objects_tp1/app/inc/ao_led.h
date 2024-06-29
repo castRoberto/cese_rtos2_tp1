@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,64 +29,53 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
+
+#ifndef AO_LED_H_
+#define AO_LED_H_
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************** inclusions *******************************************/
 
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
+/********************** macros ***********************************************/
 
-#include "task_button.h"
-#include "task_led.h"
-#include "task_ui.h"
-#include "ao_led.h"
-#include "ao_ui.h"
+/********************** typedef **********************************************/
 
-/********************** macros and definitions *******************************/
+/* Led Even definition*/
+typedef enum {
 
+  AO_LED_EVENT_ON = 0,
+  AO_LED_EVENT_OFF = 1,
+  AO_LED_EVENT__N = 2,
 
-/********************** internal data declaration ****************************/
-
-/********************** internal functions declaration ***********************/
-
-/********************** internal data definition *****************************/
-
-/********************** external data declaration *****************************/
-
-TaskHandle_t task_button_h;
-
-/********************** external functions definition ************************/
-void app_init(void) {
+} ao_led_event_t;
 
 
-	ao_t ao_led_red;
-	ao_t ao_led_green;
-	ao_t ao_led_blue;
+/* Active Object definition */
+typedef struct {
 
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
+	/* Hardware */
+	GPIO_TypeDef* led_port;
+	uint32_t led_pin;
 
-  BaseType_t status;
+} ao_led_config_t;
 
-  status = xTaskCreate (task_button,
-		  	  	  	  	"task_button",
-						configMINIMAL_STACK_SIZE,
-						NULL,
-						tskIDLE_PRIORITY + (1u),
-						task_button_h);
+/********************** external data declaration ****************************/
 
-  configASSERT(pdPASS == status);
+/********************** external functions declaration ***********************/
 
+void AO_LED_config (ao_led_config_t* config);
 
-
-  LOGGER_INFO("app init");
-
-  cycle_counter_init();
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
 
+#endif /* INC_AO_LED_H_ */
 /********************** end of file ******************************************/
+

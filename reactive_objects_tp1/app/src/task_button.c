@@ -61,8 +61,6 @@
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_button;
-
 /********************** internal functions definition ************************/
 
 typedef enum
@@ -116,8 +114,8 @@ void task_button(void* argument)
 {
   button_init_();
 
-  while(true)
-  {
+  while(true) {
+
     GPIO_PinState button_state;
     button_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
 
@@ -129,7 +127,7 @@ void task_button(void* argument)
         break;
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("button pulse");
-        xSemaphoreGive(hsem_button);
+        //xSemaphoreGive(hsem_button);
         break;
       case BUTTON_TYPE_SHORT:
         LOGGER_INFO("button short");

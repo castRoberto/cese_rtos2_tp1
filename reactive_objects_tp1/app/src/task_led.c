@@ -79,48 +79,8 @@ void led_set_colors(bool r, bool g, bool b)
 
 /********************** external functions definition ************************/
 
-void task_led(void *argument)
-{
-  while (true)
-  {
-    led_color_t color;
+void task_led(void *argument) {
 
-    if(pdTRUE == xSemaphoreTake(hsem_led, 0))
-    {
-      color = LED_COLOR_RED;
-    }
-    else
-    {
-      color = LED_COLOR_NONE;
-    }
-
-    switch (color)
-    {
-      case LED_COLOR_NONE:
-        led_set_colors(false, false, false);
-        break;
-      case LED_COLOR_RED:
-        LOGGER_INFO("led red");
-        led_set_colors(true, false, false);
-        break;
-      case LED_COLOR_GREEN:
-        LOGGER_INFO("led green");
-        led_set_colors(false, true, false);
-        break;
-      case LED_COLOR_BLUE:
-        LOGGER_INFO("led blue");
-        led_set_colors(false, false, true);
-        break;
-      case LED_COLOR_WHITE:
-        LOGGER_INFO("led white");
-        led_set_colors(true, true, true);
-        break;
-      default:
-        break;
-    }
-
-    vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
-  }
 }
 
 /********************** end of file ******************************************/
