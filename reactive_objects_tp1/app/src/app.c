@@ -67,9 +67,8 @@ void app_init(void) {
 	ao_t ao_led_green;
 	ao_t ao_led_blue;
 
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
+	ao_ui_init (&ao_led_red, NULL);
+
 
   BaseType_t status;
 

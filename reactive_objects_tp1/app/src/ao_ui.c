@@ -99,5 +99,10 @@ op_result_e ao_ui_send_msg (ao_t* ao, void* msg) {
 }
 
 
+op_result_e ao_ui_destroy (ao_t* ao) {
+
+}
+
+
 
 /********************** end of file ******************************************/
