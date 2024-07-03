@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,11 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
 
-#ifndef TASK_LED_H_
-#define TASK_LED_H_
+#ifndef __AO_UI_H__
+#define __AO_UI_H__
 
 /********************** CPP guard ********************************************/
 #ifdef __cplusplus
@@ -42,21 +42,34 @@ extern "C" {
 
 /********************** inclusions *******************************************/
 
+#include "active_object.h"
+
 /********************** macros ***********************************************/
 
 /********************** typedef **********************************************/
+
+typedef enum {
+
+	SEND_ERR = 0,
+	SEND_OK = 1,
+
+} op_result_e;
 
 /********************** external data declaration ****************************/
 
 /********************** external functions declaration ***********************/
 
+void ao_ui_init (ao_t* ao, handlerFunc_t handler);
 
+op_result_e ao_ui_send_msg (ao_t* ao, void* msg);
+
+op_result_e ao_ui_destroy (ao_t* ao);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* TASK_LED_H_ */
-/********************** end of file ******************************************/
 
+#endif /* __AO_UI_H__ */
+/********************** end of file ******************************************/

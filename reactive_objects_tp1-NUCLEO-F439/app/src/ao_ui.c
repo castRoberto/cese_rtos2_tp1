@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,98 +29,108 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
 
 /********************** inclusions *******************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-#include "main.h"
-#include "cmsis_os.h"
-#include "board.h"
-#include "logger.h"
-#include "dwt.h"
+#include "ao_ui.h"
+#include "active_object.h"
+#include "ao_led.h"
 
 /********************** macros and definitions *******************************/
-
-#define TASK_PERIOD_MS_           (1000)
 
 /********************** internal data declaration ****************************/
 
 /********************** internal functions declaration ***********************/
 
-/********************** internal data definition *****************************/
+static void _task (void *parameters) {
 
-typedef enum
-{
-  LED_COLOR_NONE,
-  LED_COLOR_RED,
-  LED_COLOR_GREEN,
-  LED_COLOR_BLUE,
-  LED_COLOR_WHITE,
-  LED_COLOR__N,
-} led_color_t;
+	ao_t* ao = (ao_t*) parameters;
+
+	uint8_t msg[ao->event_size];
+
+	while (1) {
+
+		if (pdPASS == xQueueReceive(ao->event_queue_h, msg, portMAX_DELAY)) {
+
+			ao->handler ((void*)msg);
+			LOGGER_INFO(ao->task_name);
+
+		}
+
+
+	}
+
+}
+
+/********************** internal data definition *****************************/
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_led;
-
 /********************** internal functions definition ************************/
-
-void led_set_colors(bool r, bool g, bool b)
-{
-  HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, r ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_GREEN_PORT, LED_GREEN_PIN, g ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_BLUE_PORT, LED_BLUE_PIN, b ? GPIO_PIN_SET: GPIO_PIN_RESET);
-}
 
 /********************** external functions definition ************************/
 
-void task_led(void *argument)
-{
-  while (true)
-  {
-    led_color_t color;
+void ao_ui_init (ao_t* ao, handlerFunc_t handler) {
 
-    if(pdTRUE == xSemaphoreTake(hsem_led, 0))
-    {
-      color = LED_COLOR_RED;
-    }
-    else
-    {
-      color = LED_COLOR_NONE;
-    }
+	if (NULL != ao  && NULL != handler) {
 
-    switch (color)
-    {
-      case LED_COLOR_NONE:
-        led_set_colors(false, false, false);
-        break;
-      case LED_COLOR_RED:
-        LOGGER_INFO("led red");
-        led_set_colors(true, false, false);
-        break;
-      case LED_COLOR_GREEN:
-        LOGGER_INFO("led green");
-        led_set_colors(false, true, false);
-        break;
-      case LED_COLOR_BLUE:
-        LOGGER_INFO("led blue");
-        led_set_colors(false, false, true);
-        break;
-      case LED_COLOR_WHITE:
-        LOGGER_INFO("led white");
-        led_set_colors(true, true, true);
-        break;
-      default:
-        break;
-    }
+		ao->event_queue_h = xQueueCreate (ao->event_queue_len, ao->event_size);
+		configASSERT(NULL != ao->event_queue_h);
 
-    vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
-  }
+		vQueueAddToRegistry(ao->event_queue_h, ao->queue_name);
+
+
+		BaseType_t status =
+			xTaskCreate (_task,
+						 ao->task_name,
+						 ao->stack_size,
+						 (void*)ao,
+						 ao->priority,
+						 &ao->thread_h);
+
+		configASSERT(pdPASS == status);
+
+		ao->handler = handler;
+
+	}
+
 }
+
+
+op_result_e ao_ui_send_msg (ao_t* ao, void* msg) {
+
+	op_result_e result = SEND_ERR;
+
+	if (NULL != ao  && NULL != msg) {
+
+		result = (pdPASS == xQueueSend (ao->event_queue_h, msg, 0));
+
+	}
+
+	return result;
+
+}
+
+
+op_result_e ao_ui_destroy (ao_t* ao) {
+
+	if (NULL != ao) {
+
+		vQueueDelete (ao->event_queue_h);
+
+		vTaskDelete (ao->thread_h);
+
+		ao->handler = NULL;
+
+	}
+
+	return (NULL == ao->event_queue_h && NULL == ao->thread_h);
+
+}
+
+
 
 /********************** end of file ******************************************/

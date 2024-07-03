@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,16 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
+
+#ifndef __ACTIVE_OBJECT_H__
+#define __ACTIVE_OBJECT_H__
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************** inclusions *******************************************/
 
@@ -44,33 +52,43 @@
 #include "logger.h"
 #include "dwt.h"
 
-/********************** macros and definitions *******************************/
+/********************** macros ***********************************************/
 
-/********************** internal data declaration ****************************/
+/********************** typedef **********************************************/
 
-/********************** internal functions declaration ***********************/
+typedef void (*handlerFunc_t)(void* event);
 
-/********************** internal data definition *****************************/
+/* Active Object definition */
+typedef struct {
 
-/********************** external data definition *****************************/
+	/* OS */
 
-extern SemaphoreHandle_t hsem_button;
-extern SemaphoreHandle_t hsem_led;
+	// Queue
+	QueueHandle_t event_queue_h;
+	uint16_t event_queue_len;
+	size_t event_size;
+	char queue_name[configMAX_TASK_NAME_LEN];
 
-/********************** internal functions definition ************************/
+	// Thread
+	char task_name[configMAX_TASK_NAME_LEN];
+	TaskHandle_t thread_h;
+	UBaseType_t priority;
+	uint16_t stack_size;
 
-/********************** external functions definition ************************/
+	/* Process */
+	handlerFunc_t handler;
 
-void task_ui(void *argument)
-{
-  while (true)
-  {
-    if(pdTRUE == xSemaphoreTake(hsem_button, portMAX_DELAY))
-    {
-      LOGGER_INFO("ui led activate");
-      xSemaphoreGive(hsem_led);
-    }
-  }
+} ao_t;
+
+/********************** external data declaration ****************************/
+
+/********************** external functions declaration ***********************/
+
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
 
+#endif /* __ACTIVE_OBJECT_H__ */
 /********************** end of file ******************************************/
+

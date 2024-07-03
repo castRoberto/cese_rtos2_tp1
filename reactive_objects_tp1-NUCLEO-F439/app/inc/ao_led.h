@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Grupo 2.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,11 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @author : Grupo 2
  */
 
-#ifndef TASK_UI_H_
-#define TASK_UI_H_
+#ifndef __AO_LED_H__
+#define __AO_LED_H__
 
 /********************** CPP guard ********************************************/
 #ifdef __cplusplus
@@ -42,21 +42,47 @@ extern "C" {
 
 /********************** inclusions *******************************************/
 
+#include "active_object.h"
+
 /********************** macros ***********************************************/
 
 /********************** typedef **********************************************/
 
+/* Led Even definition*/
+typedef enum {
+
+  AO_LED_EVENT_OFF = 0,
+  AO_LED_EVENT_ON = 1,
+  AO_LED_EVENT__N = 2,
+
+} ao_led_state_t;
+
+
+/* Active Object definition */
+typedef struct {
+
+	/* Hardware */
+	GPIO_TypeDef* led_port;
+	uint32_t led_pin;
+	ao_led_state_t led_state;
+
+} ao_led_even_t;
+
 /********************** external data declaration ****************************/
+
+extern ao_t ao_led_red;
+extern ao_t ao_led_green;
+extern ao_t ao_led_blue;
 
 /********************** external functions declaration ***********************/
 
-void task_ui(void* argument);
+void task_led_handler (void* msg);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* TASK_UI_H_ */
+#endif /* __AO_LED_H__ */
 /********************** end of file ******************************************/
 

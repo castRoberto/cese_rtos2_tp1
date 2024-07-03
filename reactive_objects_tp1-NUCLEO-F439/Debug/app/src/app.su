@@ -1,1 +1,1 @@
-../app/src/app.c:62:6:app_init	24	static
+../app/src/app.c:62:6:app_init	24	static,ignoring_inline_asm

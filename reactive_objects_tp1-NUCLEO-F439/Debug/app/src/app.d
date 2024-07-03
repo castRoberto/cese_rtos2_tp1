@@ -49,7 +49,9 @@ app/src/app.o: ../app/src/app.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
  ../app/inc/logger.h ../app/inc/dwt.h ../app/inc/board.h \
- ../app/inc/task_button.h ../app/inc/task_led.h ../app/inc/task_ui.h
+ ../app/inc/task_button.h ../app/inc/task_led.h ../app/inc/ao_led.h \
+ ../app/inc/active_object.h ../app/inc/board.h ../app/inc/logger.h \
+ ../app/inc/dwt.h ../app/inc/ao_ui.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -105,4 +107,9 @@ app/src/app.o: ../app/src/app.c ../Core/Inc/main.h \
 ../app/inc/board.h:
 ../app/inc/task_button.h:
 ../app/inc/task_led.h:
-../app/inc/task_ui.h:
+../app/inc/ao_led.h:
+../app/inc/active_object.h:
+../app/inc/board.h:
+../app/inc/logger.h:
+../app/inc/dwt.h:
+../app/inc/ao_ui.h:

@@ -34,19 +34,25 @@
 
 /********************** inclusions *******************************************/
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "main.h"
 #include "cmsis_os.h"
+#include "board.h"
 #include "logger.h"
 #include "dwt.h"
-#include "board.h"
-
-#include "task_button.h"
-#include "task_led.h"
 #include "ao_led.h"
-#include "ao_ui.h"
 
 /********************** macros and definitions *******************************/
 
+#define TASK_PERIOD_MS_           (1000u)
+
+#define QUEUE_LEN				  (5u)
+#define QUEUE_SIZE_EVEN			  (sizeof (ao_led_even_t))
+#define TASK_PRIORITY			  (1u)
+#define MS_DELAY				  (1000u)
 
 /********************** internal data declaration ****************************/
 
@@ -54,34 +60,88 @@
 
 /********************** internal data definition *****************************/
 
-/********************** external data declaration *****************************/
+typedef enum
+{
+  LED_COLOR_NONE,
+  LED_COLOR_RED,
+  LED_COLOR_GREEN,
+  LED_COLOR_BLUE,
+  LED_COLOR_WHITE,
+  LED_COLOR__N,
+} led_color_t;
 
-TaskHandle_t task_button_h;
+/********************** external data definition *****************************/
+
+ao_t ao_led_red = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED RED queue",
+
+		// Thread
+	.task_name = "LED RED task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_green = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED GREEN queue",
+
+		// Thread
+	.task_name = "LED GREEN task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_blue = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED BLUE queue",
+
+		// Thread
+	.task_name = "LED BLUE task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+/********************** internal functions definition ************************/
 
 /********************** external functions definition ************************/
-void app_init(void) {
 
-	ao_ui_init (&ao_led_red, task_led_handler);
-	ao_ui_init (&ao_led_green, task_led_handler);
-	ao_ui_init (&ao_led_blue, task_led_handler);
+void task_led_handler (void* msg) {
 
+	TickType_t delay = pdMS_TO_TICKS(MS_DELAY);
 
-	BaseType_t status;
+	ao_led_even_t* event = (ao_led_even_t*) msg;
 
-	status = xTaskCreate (task_button,
-		  	  	  	  	  "task_button",
-						  configMINIMAL_STACK_SIZE,
-						  NULL,
-						  tskIDLE_PRIORITY + (1u),
-						  &task_button_h);
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, event->led_state);
 
-	configASSERT(pdPASS == status);
+	vTaskDelay(delay);
 
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, !event->led_state);
 
-
-	LOGGER_INFO("app init");
-
-	cycle_counter_init();
 }
 
 /********************** end of file ******************************************/

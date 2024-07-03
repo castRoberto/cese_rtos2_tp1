@@ -1,0 +1,4 @@
+../app/src/ao_ui.c:48:13:_task	48	dynamic
+../app/src/ao_ui.c:76:6:ao_ui_init	40	static,ignoring_inline_asm
+../app/src/ao_ui.c:103:13:ao_ui_send_msg	24	static
+../app/src/ao_ui.c:118:13:ao_ui_destroy	16	static
