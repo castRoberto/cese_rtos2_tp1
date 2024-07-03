@@ -42,7 +42,6 @@
 
 #include "task_button.h"
 #include "task_led.h"
-#include "task_ui.h"
 #include "ao_led.h"
 #include "ao_ui.h"
 
@@ -62,31 +61,27 @@ TaskHandle_t task_button_h;
 /********************** external functions definition ************************/
 void app_init(void) {
 
+	ao_ui_init (&ao_led_red, task_led_handler);
+	ao_ui_init (&ao_led_green, task_led_handler);
+	ao_ui_init (&ao_led_blue, task_led_handler);
 
-	ao_t ao_led_red;
-	ao_t ao_led_green;
-	ao_t ao_led_blue;
 
-	ao_ui_init (ao_led_red, task_led);
-	ao_ui_init (ao_led_green, task_led);
-	ao_ui_init (ao_led_blue, task_led);
+	BaseType_t status;
 
-  BaseType_t status;
+	status = xTaskCreate (task_button,
+		  	  	  	  	  "task_button",
+						  configMINIMAL_STACK_SIZE,
+						  NULL,
+						  tskIDLE_PRIORITY + (1u),
+						  &task_button_h);
 
-  status = xTaskCreate (task_button,
-		  	  	  	  	"task_button",
-						configMINIMAL_STACK_SIZE,
-						NULL,
-						tskIDLE_PRIORITY + (1u),
-						task_button_h);
-
-  configASSERT(pdPASS == status);
+	configASSERT(pdPASS == status);
 
 
 
-  LOGGER_INFO("app init");
+	LOGGER_INFO("app init");
 
-  cycle_counter_init();
+	cycle_counter_init();
 }
 
 /********************** end of file ******************************************/

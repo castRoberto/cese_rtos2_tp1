@@ -50,8 +50,8 @@ extern "C" {
 
 typedef enum {
 
-	SEND_OK = 0,
-	SEND_ERR = 1
+	SEND_ERR = 0,
+	SEND_OK = 1,
 
 } op_result_e;
 
@@ -62,6 +62,8 @@ typedef enum {
 void ao_ui_init (ao_t* ao, handlerFunc_t handler);
 
 op_result_e ao_ui_send_msg (ao_t* ao, void* msg);
+
+op_result_e ao_ui_destroy (ao_t* ao);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus

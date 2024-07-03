@@ -73,6 +73,7 @@ typedef struct {
 	char task_name[configMAX_TASK_NAME_LEN];
 	TaskHandle_t thread_h;
 	UBaseType_t priority;
+	uint16_t stack_size;
 
 	/* Process */
 	handlerFunc_t handler;
