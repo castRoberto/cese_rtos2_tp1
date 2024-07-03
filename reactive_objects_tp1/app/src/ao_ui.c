@@ -37,6 +37,7 @@
 
 #include "ao_ui.h"
 #include "active_object.h"
+#include "ao_led.h"
 
 /********************** macros and definitions *******************************/
 
@@ -48,14 +49,17 @@ static void _task (void *parameters) {
 
 	ao_t* ao = (ao_t*) parameters;
 
+	uint8_t msg[ao->event_size];
+
 	while (1) {
 
-		void* msg;
 		if (pdPASS == xQueueReceive(ao->event_queue_h, msg, portMAX_DELAY)) {
 
-			ao->handler (msg);
+			ao->handler ((void*)msg);
+			LOGGER_INFO(ao->task_name);
 
 		}
+
 
 	}
 
@@ -71,30 +75,59 @@ static void _task (void *parameters) {
 
 void ao_ui_init (ao_t* ao, handlerFunc_t handler) {
 
-	ao->event_queue_h = xQueueCreate (ao->event_queue_len, ao->event_size);
-	configASSERT(NULL != ao->event_queue_h);
+	if (NULL != ao  && NULL != handler) {
 
-	vQueueAddToRegistry(ao->event_queue_h, ao->queue_name);
+		ao->event_queue_h = xQueueCreate (ao->event_queue_len, ao->event_size);
+		configASSERT(NULL != ao->event_queue_h);
+
+		vQueueAddToRegistry(ao->event_queue_h, ao->queue_name);
 
 
-	BaseType_t status =
-		xTaskCreate (_task,
-					 ao->task_name,
-					 configMINIMAL_STACK_SIZE,
-					 (void*)ao,
-					 ao->priority,
-					 &ao->thread_h);
+		BaseType_t status =
+			xTaskCreate (_task,
+						 ao->task_name,
+						 ao->stack_size,
+						 (void*)ao,
+						 ao->priority,
+						 &ao->thread_h);
 
-	configASSERT(pdPASS == status);
+		configASSERT(pdPASS == status);
 
-	ao->handler = handler;
+		ao->handler = handler;
+
+	}
 
 }
 
 
 op_result_e ao_ui_send_msg (ao_t* ao, void* msg) {
 
-	return (pdPASS == xQueueSend (ao->event_queue_h, msg, 0));
+	op_result_e result = SEND_ERR;
+
+	if (NULL != ao  && NULL != msg) {
+
+		result = (pdPASS == xQueueSend (ao->event_queue_h, msg, 0));
+
+	}
+
+	return result;
+
+}
+
+
+op_result_e ao_ui_destroy (ao_t* ao) {
+
+	if (NULL != ao) {
+
+		vQueueDelete (ao->event_queue_h);
+
+		vTaskDelete (ao->thread_h);
+
+		ao->handler = NULL;
+
+	}
+
+	return (NULL == ao->event_queue_h && NULL == ao->thread_h);
 
 }
 

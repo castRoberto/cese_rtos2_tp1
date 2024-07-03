@@ -50,7 +50,7 @@ extern "C" {
 
 /********************** external functions declaration ***********************/
 
-void task_led(void* argument);
+
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus

@@ -43,8 +43,16 @@
 #include "board.h"
 #include "logger.h"
 #include "dwt.h"
+#include "ao_led.h"
 
 /********************** macros and definitions *******************************/
+
+#define TASK_PERIOD_MS_           (1000u)
+
+#define QUEUE_LEN				  (5u)
+#define QUEUE_SIZE_EVEN			  (sizeof (ao_led_even_t))
+#define TASK_PRIORITY			  (1u)
+#define MS_DELAY				  (1000u)
 
 /********************** internal data declaration ****************************/
 
@@ -52,19 +60,88 @@
 
 /********************** internal data definition *****************************/
 
+typedef enum
+{
+  LED_COLOR_NONE,
+  LED_COLOR_RED,
+  LED_COLOR_GREEN,
+  LED_COLOR_BLUE,
+  LED_COLOR_WHITE,
+  LED_COLOR__N,
+} led_color_t;
+
 /********************** external data definition *****************************/
 
+ao_t ao_led_red = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED RED queue",
+
+		// Thread
+	.task_name = "LED RED task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_green = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED GREEN queue",
+
+		// Thread
+	.task_name = "LED GREEN task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_blue = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED BLUE queue",
+
+		// Thread
+	.task_name = "LED BLUE task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
 
 /********************** internal functions definition ************************/
 
 /********************** external functions definition ************************/
 
-void task_ui(void *argument)
-{
-  while (true)
-  {
+void task_led_handler (void* msg) {
 
-  }
+	TickType_t delay = pdMS_TO_TICKS(MS_DELAY);
+
+	ao_led_even_t* event = (ao_led_even_t*) msg;
+
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, event->led_state);
+
+	vTaskDelay(delay);
+
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, !event->led_state);
+
 }
 
 /********************** end of file ******************************************/
