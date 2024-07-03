@@ -49,13 +49,13 @@ static void _task (void *parameters) {
 
 	ao_t* ao = (ao_t*) parameters;
 
-	char msg[ao->event_size];
+	uint8_t msg[ao->event_size];
 
 	while (1) {
 
-		if (pdPASS == xQueueReceive(ao->event_queue_h, &msg, portMAX_DELAY)) {
+		if (pdPASS == xQueueReceive(ao->event_queue_h, msg, portMAX_DELAY)) {
 
-			ao->handler ((void*)&msg);
+			ao->handler ((void*)msg);
 			LOGGER_INFO(ao->task_name);
 
 		}
