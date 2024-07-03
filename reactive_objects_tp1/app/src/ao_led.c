@@ -43,10 +43,15 @@
 #include "board.h"
 #include "logger.h"
 #include "dwt.h"
+#include "ao_led.h"
 
 /********************** macros and definitions *******************************/
+#define TASK_PERIOD_MS_           (1000u)
 
-#define TASK_PERIOD_MS_           (1000)
+#define QUEUE_LEN				  (5u)
+#define QUEUE_SIZE_EVEN			  (sizeof (ao_led_even_t))
+#define TASK_PRIORITY			  (1u)
+#define MS_DELAY				  (1000u)
 
 /********************** internal data declaration ****************************/
 
@@ -66,20 +71,77 @@ typedef enum
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_led;
+
+ao_t ao_led_red = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED RED queue",
+
+		// Thread
+	.task_name = "LED RED task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_green = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED GREEN queue",
+
+		// Thread
+	.task_name = "LED GREEN task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
+
+ao_t ao_led_blue = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = QUEUE_LEN,
+	.event_size = QUEUE_SIZE_EVEN,
+	.queue_name = "LED BLUE queue",
+
+		// Thread
+	.task_name = "LED BLUE task",
+	.thread_h = NULL,
+	.priority = TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
 
 /********************** internal functions definition ************************/
 
-void led_set_colors(bool r, bool g, bool b)
-{
-  HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, r ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_GREEN_PORT, LED_GREEN_PIN, g ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_BLUE_PORT, LED_BLUE_PIN, b ? GPIO_PIN_SET: GPIO_PIN_RESET);
-}
 
 /********************** external functions definition ************************/
 
-void task_led(void *argument) {
+void task_led_handler (void* msg) {
+
+	TickType_t delay = pdMS_TO_TICKS(MS_DELAY);
+
+	ao_led_even_t* event = (ao_led_even_t*) msg;
+
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, event->led_state);
+
+	vTaskDelay(delay);
+
+	HAL_GPIO_WritePin(event->led_port, event->led_pin, !event->led_state);
 
 }
 
