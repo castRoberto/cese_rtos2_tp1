@@ -32,8 +32,8 @@
  * @author : Grupo 2
  */
 
-#ifndef AO_LED_H_
-#define AO_LED_H_
+#ifndef __AO_LED_H__
+#define __AO_LED_H__
 
 /********************** CPP guard ********************************************/
 #ifdef __cplusplus
@@ -42,6 +42,8 @@ extern "C" {
 
 /********************** inclusions *******************************************/
 
+#include "active_object.h"
+
 /********************** macros ***********************************************/
 
 /********************** typedef **********************************************/
@@ -49,11 +51,11 @@ extern "C" {
 /* Led Even definition*/
 typedef enum {
 
-  AO_LED_EVENT_ON = 0,
-  AO_LED_EVENT_OFF = 1,
+  AO_LED_EVENT_OFF = 0,
+  AO_LED_EVENT_ON = 1,
   AO_LED_EVENT__N = 2,
 
-} ao_led_event_t;
+} ao_led_state_t;
 
 
 /* Active Object definition */
@@ -62,20 +64,25 @@ typedef struct {
 	/* Hardware */
 	GPIO_TypeDef* led_port;
 	uint32_t led_pin;
+	ao_led_state_t led_state;
 
-} ao_led_config_t;
+} ao_led_even_t;
 
 /********************** external data declaration ****************************/
 
+extern ao_t ao_led_red;
+extern ao_t ao_led_green;
+extern ao_t ao_led_blue;
+
 /********************** external functions declaration ***********************/
 
-void AO_LED_config (ao_led_config_t* config);
+void task_led_handler (void* msg);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_AO_LED_H_ */
+#endif /* __AO_LED_H__ */
 /********************** end of file ******************************************/
 

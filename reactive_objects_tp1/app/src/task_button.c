@@ -43,6 +43,8 @@
 #include "board.h"
 #include "logger.h"
 #include "dwt.h"
+#include "ao_led.h"
+#include "ao_ui.h"
 
 /********************** macros and definitions *******************************/
 
@@ -54,6 +56,30 @@
 #define BUTTON_LONG_TIMEOUT_      (2000)
 
 /********************** internal data declaration ****************************/
+
+ao_led_even_t ao_led_event_red = (ao_led_even_t) {
+
+	.led_port = LED_RED_PORT,
+	.led_pin = LED_RED_PIN,
+	.led_state = AO_LED_EVENT_ON
+
+};
+
+ao_led_even_t ao_led_event_green = (ao_led_even_t) {
+
+	.led_port = LED_GREEN_PORT,
+	.led_pin = LED_GREEN_PIN,
+	.led_state = AO_LED_EVENT_ON
+
+};
+
+ao_led_even_t ao_led_event_blue = (ao_led_even_t) {
+
+	.led_port = LED_BLUE_PORT,
+	.led_pin = LED_BLUE_PIN,
+	.led_state = AO_LED_EVENT_ON
+
+};
 
 /********************** internal functions declaration ***********************/
 
@@ -114,7 +140,11 @@ void task_button(void* argument)
 {
   button_init_();
 
+  bool process = false;
+
   while(true) {
+
+	op_result_e result = SEND_ERR;
 
     GPIO_PinState button_state;
     button_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
@@ -127,18 +157,31 @@ void task_button(void* argument)
         break;
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("button pulse");
-        //xSemaphoreGive(hsem_button);
+        result = ao_ui_send_msg (&ao_led_red, (void*) &ao_led_event_red);
+        process = true;
         break;
       case BUTTON_TYPE_SHORT:
         LOGGER_INFO("button short");
+        result = ao_ui_send_msg (&ao_led_green, (void*) &ao_led_event_green);
+        process = true;
         break;
       case BUTTON_TYPE_LONG:
         LOGGER_INFO("button long");
+        result = ao_ui_send_msg (&ao_led_blue, (void*) &ao_led_event_blue);
+        process = true;
         break;
       default:
         LOGGER_INFO("button error");
         break;
     }
+
+    if (SEND_OK != result && true == process) {
+
+    	LOGGER_INFO("Send error!!!");
+
+    }
+
+    process = false;
 
     vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
   }
