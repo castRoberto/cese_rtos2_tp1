@@ -61,6 +61,7 @@ TaskHandle_t task_button_h;
 /********************** external functions definition ************************/
 void app_init(void) {
 
+	ao_ui_init (&ao_ui, task_ui_handler);
 	ao_ui_init (&ao_led_red, task_led_handler);
 	ao_ui_init (&ao_led_green, task_led_handler);
 	ao_ui_init (&ao_led_blue, task_led_handler);
