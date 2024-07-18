@@ -145,6 +145,7 @@ void task_button(void* argument)
   while(true) {
 
 	op_result_e result = SEND_ERR;
+	ao_ui_even_t ao_ui_event = { 0 };
 
     GPIO_PinState button_state;
     button_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
@@ -157,22 +158,37 @@ void task_button(void* argument)
         break;
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("button pulse");
-        result = ao_ui_send_msg (&ao_led_red, (void*) &ao_led_event_red);
+
+        ao_ui_event.ao_led = &ao_led_red;
+        ao_ui_event.msg = &ao_led_event_red;
+
         process = true;
         break;
       case BUTTON_TYPE_SHORT:
         LOGGER_INFO("button short");
-        result = ao_ui_send_msg (&ao_led_green, (void*) &ao_led_event_green);
+
+        ao_ui_event.ao_led = &ao_led_green;
+        ao_ui_event.msg = &ao_led_event_green;
+
         process = true;
         break;
       case BUTTON_TYPE_LONG:
         LOGGER_INFO("button long");
-        result = ao_ui_send_msg (&ao_led_blue, (void*) &ao_led_event_blue);
+
+        ao_ui_event.ao_led = &ao_led_blue;
+        ao_ui_event.msg = &ao_led_event_blue;
+
         process = true;
         break;
       default:
         LOGGER_INFO("button error");
         break;
+    }
+
+    if (true == process) {
+
+    	result = ao_ui_send_msg (&ao_ui, (void*) &ao_ui_event);
+
     }
 
     if (SEND_OK != result && true == process) {

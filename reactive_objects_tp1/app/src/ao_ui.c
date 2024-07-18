@@ -41,6 +41,10 @@
 
 /********************** macros and definitions *******************************/
 
+#define UI_QUEUE_LEN				  (15u)
+#define UI_QUEUE_SIZE_EVEN			  (sizeof (ao_ui_even_t))
+#define UI_TASK_PRIORITY			  (1u)
+
 /********************** internal data declaration ****************************/
 
 /********************** internal functions declaration ***********************/
@@ -68,6 +72,24 @@ static void _task (void *parameters) {
 /********************** internal data definition *****************************/
 
 /********************** external data definition *****************************/
+
+ao_t ao_ui = (ao_t) {
+
+	.event_queue_h = NULL,
+	.event_queue_len = UI_QUEUE_LEN,
+	.event_size = UI_QUEUE_SIZE_EVEN,
+	.queue_name = "UI AO queue",
+
+		// Thread
+	.task_name = "UI AO task",
+	.thread_h = NULL,
+	.priority = UI_TASK_PRIORITY,
+	.stack_size = configMINIMAL_STACK_SIZE,
+
+		/* Process */
+	.handler = NULL,
+
+};
 
 /********************** internal functions definition ************************/
 
@@ -128,6 +150,15 @@ op_result_e ao_ui_destroy (ao_t* ao) {
 	}
 
 	return (NULL == ao->event_queue_h && NULL == ao->thread_h);
+
+}
+
+
+void task_ui_handler (void* msg) {
+
+	ao_ui_even_t* ao_ui_event = (ao_ui_even_t*) msg;
+
+	ao_ui_send_msg (ao_ui_event->ao_led, ao_ui_event->msg);
 
 }
 
